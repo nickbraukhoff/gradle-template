@@ -1,0 +1,21 @@
+apply plugin: 'maven-publish'
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            credentials {
+                username System.env.NEXUS_DEPLOY_USER
+                password System.env.NEXUS_DEPLOY_PASSWORD
+            }
+            url = project.version.endsWith('-SNAPSHOT') ? repos : repos
+        }
+    }
+}
+
+
+

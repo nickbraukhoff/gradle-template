@@ -1,0 +1,11 @@
+ext {
+    repos = []
+}
+
+repositories {
+//    maven { url }
+    mavenCentral()
+    mavenLocal()
+}
+
+

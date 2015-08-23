@@ -1,0 +1,117 @@
+buildscript { apply from: file("$rootDir/gradle/buildScript.gradle"), to: buildscript }
+
+task release(dependsOn: ['check', 'cobertura', 'javadoc', 'publish'])
+task releaseLocal(dependsOn: ['check', 'cobertura', 'publishToMavenLocal'])
+
+apply from: "$rootDir/gradle/repositories.gradle"
+apply from: "$rootDir/gradle/dependencies.gradle"
+
+configurations.all {
+    // check for updates every build
+    resolutionStrategy{
+        cacheChangingModulesFor 0, 'seconds'
+    }
+}
+
+configurations {
+    wsimport
+}
+
+allprojects {
+    apply from: "$rootDir/gradle/artifacts.gradle"
+    apply from: "$rootDir/gradle/codeQuality.gradle"
+    apply from: "$rootDir/gradle/tests.gradle"
+}
+
+apply plugin: 'java'
+apply plugin: "propdeps"
+apply plugin: 'idea'
+
+sourceCompatibility = 1.6
+
+dependencies {
+    compile([
+            libs.log4j,
+            libs.guava,
+            libs.inject,
+            libs.commonsLang3,
+            libs.commonsCollection,
+            libs.springBean,
+            libs.slf4j,
+            libs.archaius,
+            libs.hystrix
+    ])
+
+    testCompile([
+            libs.junit,
+            libs.mockito,
+            libs.hamcrest
+    ])
+
+    wsimport 'com.sun.xml.ws:jaxws-tools:2.2.10'
+}
+
+// Generate wrapper, which is distributed as part of source to alleviate the need of installing gradle
+task createWrapper(type: Wrapper) {
+    gradleVersion = "2.4"
+    distributionUrl = "https://services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
+}
+
+/*
+task generateJWSService(type: WSImport) {
+    wsdl = file('')
+}
+
+
+task generateJWS(dependsOn: ['generateJWSService'])
+
+sourceSets {
+    generated {
+        java {
+            srcDir file("${project.buildDir}/wsimport/")
+        }
+    }
+    main {
+        compileClasspath += generated.output
+        runtimeClasspath += generated.output
+    }
+    test {
+        compileClasspath += generated.output
+        runtimeClasspath += generated.output
+    }
+}
+
+compileJava.dependsOn 'generateJWS'
+
+
+jar { from sourceSets.generated.output }
+
+class WSImport extends DefaultTask {
+
+    @OutputDirectory
+    def File outputDir = project.file("${project.buildDir}/wsimport")
+
+    @InputFile
+    def wsdl
+
+    def bindingFileLocation
+
+    @TaskAction
+    def generate() {
+        project.ant.taskdef(name: 'wsimport', classname: 'com.sun.tools.ws.ant.WsImport', classpath: project.configurations.wsimport.asPath)
+        project.ant.wsimport(
+                sourcedestdir: outputDir.path,
+                wsdllocation: "../${wsdl.name}",
+                wsdl: wsdl,
+                xnocompile: true,
+                xendorsed: true,
+                extension: true,
+                keep: false
+        )
+    }
+}
+
+*/
+
+
+
